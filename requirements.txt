@@ -3,3 +3,4 @@ django-taggit
 django-crispy-crispy
 pillow
 django-import-export
+django-jazzmin
