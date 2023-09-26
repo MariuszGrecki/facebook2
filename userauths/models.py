@@ -3,6 +3,11 @@ from django.contrib.auth.models import AbstractUser
 from PIL import Image
 from shortuuid.django_fields import ShortUUIDField
 
+from django.db.models.signals import post_save
+
+from django.utils.text import slugify
+import shortuuid
+
 # Create your models here.
 
 GENDER = (
@@ -59,11 +64,27 @@ class Profile(models.Model):
     friends = models.ManyToManyField(User, blank = True, related_name="friends")
     blocked = models.ManyToManyField(User, blank = True, related_name="blocked")
     date = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(unique=True, blank=True, null=True)
 
     def __str__(self):
         return self.user.username
 
+    def save(self, *args, **kwargs):
+        if self.slug == "" or self.slug == None:
+            uuid_key = shortuuid.uuid()  #random key
+            uniqueid = uuid_key[:2] #skrócenie
+            self.slug = slugify(self.full_name) + '-' + str(uniqueid.lower())
+        super(Profile, self).save(*args, **kwargs) # wywołanie funkcji save z klasy nadrzędnej
 
+def create_user_profile(sender, instance, created, **Kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
+
+post_save.connect(create_user_profile, sender=User)
+post_save.connect(save_user_profile, sender=User)
 
 
 
