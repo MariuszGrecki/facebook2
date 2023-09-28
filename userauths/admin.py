@@ -2,5 +2,14 @@ from django.contrib import admin
 from userauths.models import User, Profile
 # Register your models here.
 
-admin.site.register(User)
-admin.site.register(Profile)
+
+#tutaj wybieramy kolumny, które maja się wyświetlić w adminie
+class UserCustomAdmin(admin.ModelAdmin):
+    list_display = ['full_name', 'username', 'email', 'gender']
+
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['full_name', 'user', 'verified']
+    list_editable = ['verified']
+
+admin.site.register(User, UserCustomAdmin)
+admin.site.register(Profile, ProfileAdmin)
