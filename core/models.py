@@ -1,3 +1,23 @@
 from django.db import models
+from userauths.models import User, Profile, user_directory_path
+
+from shortuuid.django_fields import ShortUUIDField
+
+VISIBIKITY = (
+    ("Only Me", "Only Me"),
+    ("Everyone", "Everyone"),
+)
 
 # Create your models here.
+
+class Post(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=500, blank=True, null=True)
+    image = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
+    video = models.FileField(upload_to=user_directory_path, blank=True, null=True)
+    visibility = models.CharField(max_length=100, choices=VISIBIKITY, default="Everyone")
+    pid = ShortUUIDField(length=7, max_length=25, alphabet='abcdefghijklmnopqrstuvwxyz')
+    likes = models.ManyToManyField(User, blank=True, related_name="likes")
+    active = models.BooleanField(default=True)
+    slug = models.SlugField(unique=True)
+    views = models.PositiveIntegerField(default=0)
