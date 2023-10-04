@@ -1,7 +1,9 @@
 from django.db import models
 from userauths.models import User, Profile, user_directory_path
+from django.utils.text import slugify
 
 from shortuuid.django_fields import ShortUUIDField
+import shortuuid
 
 VISIBIKITY = (
     ("Only Me", "Only Me"),
@@ -21,3 +23,24 @@ class Post(models.Model):
     active = models.BooleanField(default=True)
     slug = models.SlugField(unique=True)
     views = models.PositiveIntegerField(default=0)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.title:
+            return self.title
+        else:
+            return self.user.username
+        
+    def save(self, *args, **kwargs):
+        uuid_key = shortuuid.uuid()
+        uniqueid = uuid_key[:2]
+        if self.slug == "" or self.slug == None:        
+            self.slug = slugify(self.title) + '-' + uniqueid
+
+        super(Post, self).save(*args, **kwargs)
+
+    def thumbnail(self):
+        return mark_safe('<img src="/media/%s" width="50" height="50" object-fit:"cover" style="border-radius: 5px;" /> ' % (self.image))
+    
+    
+    
